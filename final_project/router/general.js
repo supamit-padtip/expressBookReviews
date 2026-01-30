@@ -9,18 +9,15 @@ const public_users = express.Router();
 public_users.post("/register", (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
-
-    if (authenticatedUser(username, password)) {
-        return res.status(400).json({ message: "Username already exist" })
+    if (username && password) {
+        if (!isValid(username)) {
+            users.push({ "username": username, "password": password });
+            return res.status(200).json({ message: "User successfully registered. Now you can login" });
+        } else {
+            return res.status(404).json({ message: "User already exists!" });
+        }
     }
-
-    if (!username || !password) {
-        return res.status(400).json({ message: "Username or Password is not provided" })
-    }
-
-    users.push({ username, password })
-
-    return res.status(300).json({ message: "Registered user" });
+    return res.status(404).json({ message: "Unable to register user." });
 });
 
 // Get the book list available in the shop
@@ -30,6 +27,8 @@ public_users.get('/', function (req, res) {
         resolve(books)
     }).then((promiseBook) => {
         res.status(200).json(promiseBook);
+    }).catch(() => {
+        res.status(400).json({ message: "No books found" });
     })
 });
 
@@ -48,8 +47,9 @@ public_users.get('/isbn/:isbn', function (req, res) {
         }));
 
         return res.status(200).json(newObj);
+    }).catch(() => {
+        res.status(400).json({ message: "No books found" });
     })
-
 });
 
 // Get book details based on author
@@ -59,14 +59,16 @@ public_users.get('/author/:author', function (req, res) {
     }).then((promiseBook) => {
         const author = req.params.author;
         const newObj = {}
-    
+
         Object.entries(promiseBook).filter(([key, value]) =>
             value.author === author
         ).forEach((([key, value]) => {
             newObj[key] = value;
         }));
-    
+
         return res.status(200).json(newObj);
+    }).catch(() => {
+        res.status(400).json({ message: "No books found" });
     })
 });
 
@@ -77,15 +79,18 @@ public_users.get('/title/:title', function (req, res) {
     }).then((promiseBook) => {
         const title = req.params.title;
         const newObj = {}
-    
+
         Object.entries(promiseBook).filter(([key, value]) =>
             value.title === title
         ).forEach((([key, value]) => {
             newObj[key] = value;
         }));
-    
+
         return res.status(200).json(newObj);
     })
+        .catch(() => {
+            res.status(400).json({ message: "No books found" });
+        })
 });
 
 //  Get book review
