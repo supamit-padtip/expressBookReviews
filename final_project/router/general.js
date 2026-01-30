@@ -58,7 +58,9 @@ public_users.get('/title/:title', async function (req, res) {
     }
 });
 
-public_users.get('/internal/books', (req, res) => res.json(books));
+public_users.get('/internal/books', (req, res) => {
+    res.json(books);
+});
 
 public_users.get('/internal/isbn/:isbn', (req, res) => {
     const book = books[req.params.isbn];
